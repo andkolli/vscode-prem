@@ -3,7 +3,7 @@
   "displayName": "PRem – px to rem",
   "publisher": "AndreasKolli",
   "description": "Convert pixel values into rem units directly from IntelliSense.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
@@ -75,5 +75,13 @@
     "@types/node": "20.x",
     "@types/vscode": "^1.85.0",
     "typescript": "^5.8.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andkolli/vscode-prem.git"
+  },
+  "homepage": "https://github.com/andkolli/vscode-prem#readme",
+  "bugs": {
+    "url": "https://github.com/andkolli/vscode-prem/issues"
   }
 }

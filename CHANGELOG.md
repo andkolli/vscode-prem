@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.0.1
+## 1.0.1
+
+- Added GitHub repository metadata (`repository`, `homepage`, and `bugs`).
+
+## 1.0.0
 
 - Initial release of PRem.
 - Added IntelliSense conversion from `<number>prem` to `rem`.

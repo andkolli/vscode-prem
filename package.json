@@ -1,0 +1,79 @@
+{
+  "name": "prem",
+  "displayName": "PRem – px to rem",
+  "publisher": "AndreasKolli",
+  "description": "Convert pixel values into rem units directly from IntelliSense.",
+  "version": "1.0.0",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "css",
+    "rem",
+    "pixel",
+    "px",
+    "intellisense"
+  ],
+  "activationEvents": [
+    "onLanguage:css",
+    "onLanguage:scss",
+    "onLanguage:sass",
+    "onLanguage:less",
+    "onLanguage:postcss",
+    "onLanguage:html",
+    "onLanguage:vue",
+    "onLanguage:svelte",
+    "onLanguage:astro"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "prem.convertSelectionToRem",
+        "title": "Convert Selection to rem",
+        "category": "PRem",
+        "enablement": "editorHasSelection"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "prem.convertSelectionToRem",
+          "when": "editorHasSelection"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "prem.convertSelectionToRem",
+          "when": "editorTextFocus && editorHasSelection",
+          "group": "modification@8"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "PRem",
+      "properties": {
+        "prem.pixelsPerRem": {
+          "type": "number",
+          "default": 16,
+          "minimum": 1,
+          "description": "Number of pixels represented by 1rem."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "20.x",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.8.2"
+  }
+}

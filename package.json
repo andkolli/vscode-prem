@@ -3,7 +3,7 @@
   "displayName": "PRem – px to rem",
   "publisher": "AndreasKolli",
   "description": "Convert pixel values into rem units directly from IntelliSense.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
@@ -61,6 +61,7 @@
           "type": "number",
           "default": 16,
           "minimum": 1,
+          "scope": "language-overridable",
           "description": "Number of pixels represented by 1rem."
         }
       }
@@ -68,12 +69,14 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "clean": "node -e \"require('fs').rmSync('out', { recursive: true, force: true })\"",
+    "compile": "npm run clean && tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node --test out/test/convert.test.js"
   },
   "devDependencies": {
-    "@types/node": "20.x",
-    "@types/vscode": "^1.85.0",
+    "@types/node": "18.x",
+    "@types/vscode": "~1.85.0",
     "typescript": "^5.8.2"
   },
   "repository": {

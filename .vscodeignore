@@ -1,4 +1,7 @@
-.vscode/**
 .gitignore
+.vscode/**
+**/*.map
+out/test/**
+package-lock.json
 src/**
 tsconfig.json

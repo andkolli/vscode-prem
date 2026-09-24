@@ -1,11 +1,7 @@
 import * as vscode from 'vscode';
 
-import {
-  createConversionCompletionItem,
-  findConversionMatch,
-  parseSelectedConversion,
-  toRemText,
-} from './prem';
+import { normalizePixelsPerRem, parseSelection, toRemText } from './convert';
+import { createConversionCompletionItem, findConversionMatch } from './prem';
 
 const DOCUMENT_SELECTOR: vscode.DocumentSelector = [
   { language: 'css' },
@@ -24,22 +20,22 @@ export function activate(context: vscode.ExtensionContext): void {
     DOCUMENT_SELECTOR,
     {
       provideCompletionItems(document, position) {
-        const settings = getSettings();
         const match = findConversionMatch(document, position);
         if (!match) {
           return undefined;
         }
 
-        return [createConversionCompletionItem(match, settings.pixelsPerRem)];
+        return [createConversionCompletionItem(match, getPixelsPerRem(document))];
       },
     },
     'm',
+    'M',
   );
 
   const convertSelectionCommand = vscode.commands.registerTextEditorCommand(
     'prem.convertSelectionToRem',
     async (editor) => {
-      const settings = getSettings();
+      const pixelsPerRem = getPixelsPerRem(editor.document);
       const selections = editor.selections.filter((selection) => !selection.isEmpty);
 
       if (selections.length === 0) {
@@ -49,45 +45,29 @@ export function activate(context: vscode.ExtensionContext): void {
         return;
       }
 
-      const replacements = selections.map((selection) => {
+      const replacements: { selection: vscode.Selection; text: string }[] = [];
+      for (const selection of selections) {
         const selectedText = editor.document.getText(selection);
-        const conversion = parseSelectedConversion(selectedText);
+        const conversion = parseSelection(selectedText);
 
         if (!conversion) {
-          return {
-            error: selectedText,
-            selection,
-          };
+          void vscode.window.showErrorMessage(
+            `PRem can only convert exact values like 32px, 16prem, 16pxrem, or 14.35. Invalid selection: "${selectedText}".`,
+          );
+          return;
         }
 
-        return {
+        const [leading] = selectedText.match(/^\s*/)!;
+        const [trailing] = selectedText.match(/\s*$/)!;
+        replacements.push({
           selection,
-          replacement: toRemText(conversion.pixels, settings.pixelsPerRem),
-        };
-      });
-
-      const invalidSelection = replacements.find(
-        (replacement): replacement is { error: string; selection: vscode.Selection } =>
-          'error' in replacement,
-      );
-
-      if (invalidSelection) {
-        void vscode.window.showErrorMessage(
-          `PRem can only convert exact values like 32px, 16prem, 16pxrem, or 14.35. Invalid selection: "${invalidSelection.error}".`,
-        );
-        return;
+          text: `${leading}${toRemText(conversion.pixels, pixelsPerRem)}${trailing}`,
+        });
       }
 
-      const validReplacements = replacements.filter(
-        (
-          replacement,
-        ): replacement is { replacement: string; selection: vscode.Selection } =>
-          'replacement' in replacement,
-      );
-
       await editor.edit((editBuilder) => {
-        for (const replacement of validReplacements) {
-          editBuilder.replace(replacement.selection, replacement.replacement);
+        for (const { selection, text } of replacements) {
+          editBuilder.replace(selection, text);
         }
       });
     },
@@ -96,17 +76,10 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(provider, convertSelectionCommand);
 }
 
-interface PremSettings {
-  pixelsPerRem: number;
-}
-
-function getSettings(): PremSettings {
-  const configuration = vscode.workspace.getConfiguration('prem');
-  const configuredValue = configuration.get<number>('pixelsPerRem', 16);
-
-  return {
-    pixelsPerRem: !configuredValue || configuredValue <= 0 ? 16 : configuredValue,
-  };
+function getPixelsPerRem(document: vscode.TextDocument): number {
+  return normalizePixelsPerRem(
+    vscode.workspace.getConfiguration('prem', document).get('pixelsPerRem'),
+  );
 }
 
 export function deactivate(): void {}
